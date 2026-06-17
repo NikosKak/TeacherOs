@@ -1,0 +1,113 @@
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using TeacherOs.DTO;
+using TeacherOs.Exceptions;
+using TeacherOs.Services;
+using System.Security.Claims;
+
+namespace TeacherOs.Controllers
+{
+    public class UserController : Controller
+    {
+        private readonly IApplicationService applicationService;
+        private readonly ILogger<UserController> logger;
+        public UserController(IApplicationService applicationService, ILogger<UserController> logger)
+        {
+            this.applicationService = applicationService;
+            this.logger = logger;
+        }
+        [HttpGet]
+        [Authorize]
+        public IActionResult Index()
+        {
+            var roleClaim = User.FindFirstValue(ClaimTypes.Role);
+            logger.LogInformation("DEBUG - Role claim value is: '{Role}'", roleClaim);
+
+            if (User.IsInRole("ADMIN"))
+            {
+                return RedirectToAction("Index", "Admin");
+            }
+            else if (User.IsInRole("TEACHER"))
+            {
+                return RedirectToAction("Index", "Teacher");
+            }
+            else if (User.IsInRole("STUDENT"))
+            {
+                return RedirectToAction("Index", "Student");
+            }
+            else
+            {
+                return RedirectToAction("AccessDenied", "Home");
+            }
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Login()
+        {
+            ClaimsPrincipal? principal = HttpContext.User;
+
+            if (!principal!.Identity!.IsAuthenticated)
+            {
+                return View();
+            }
+            return RedirectToAction("Index", "User");
+        }
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> Login(UserLoginDTO credentials)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(credentials);
+                }
+
+                var user = await applicationService.UserService.VerifyAndGetAsync(credentials);
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.Role, user.Role.Name)
+                };
+                ClaimsIdentity identity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                AuthenticationProperties properties = new()
+                {
+                    AllowRefresh = true,
+                    IsPersistent = credentials.KeepLoggedIn
+                };
+                var principal = new ClaimsPrincipal(identity);
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    principal,
+                    properties);
+                logger.LogInformation("User {Username} logged in", principal.Identity?.Name);
+                return RedirectToAction("Index", "User");
+            }
+            catch (EntityNotAuthorizedException ex)
+            {
+                logger.LogWarning(ex, "Unauthorized login attempt for username: {Username}", credentials.Username);
+                ViewData["ValidateMessage"] = "Bad Credentials. Username or password is invalid";
+                return View(credentials);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error during login");
+                ViewData["ValidateMessage"] = ex.Message;
+                return View(credentials);
+            }
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            var username = User.Identity?.Name;
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            logger.LogInformation("User {UserName} logged out", username);
+            return RedirectToAction("Login", "User");
+        }
+    }
+}

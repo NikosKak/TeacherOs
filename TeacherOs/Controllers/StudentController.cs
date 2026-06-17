@@ -1,0 +1,51 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using TeacherOs.Core;
+using TeacherOs.DTO;
+using TeacherOs.Services;
+
+namespace TeacherOs.Controllers
+{
+    public class StudentController : Controller
+    {
+        private readonly IApplicationService applicationService;
+        public List<Error> ErrorArray { get; set; } = [];
+        public StudentController(IApplicationService applicationService)
+        {
+            this.applicationService = applicationService;
+        }
+        [HttpGet]
+        [Authorize(Roles = "STUDENT")]
+        public IActionResult Index()
+        {
+            return View();
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Signup()
+        {
+            return View();
+        }
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> Signup(StudentSignupDTO studentSignupDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(studentSignupDTO);
+            }
+
+            try
+            {
+                await applicationService.StudentService.SignUpUserAsync(studentSignupDTO);
+                return RedirectToAction("Login", "User");
+            }
+            catch (Exception e)
+            {
+                ErrorArray.Add(new Error("", e.Message, ""));
+                ViewData["ErrorArray"] = ErrorArray;
+                return View(studentSignupDTO);
+            }
+        }
+    }
+}

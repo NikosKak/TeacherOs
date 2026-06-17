@@ -1,0 +1,74 @@
+﻿@using TeacherOs.Core
+@model TeacherOs.DTO.AdminSignupDTO
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Admin Signup</title>
+</head>
+<body>
+    <div class="container">
+        <main class="w-100 mt-5 p-3 border border-danger mx-auto rounded-3">
+            <h4 class="text-center text-danger mb-4">Admin Registration</h4>
+            <form asp-controller="Admin" asp-action="Signup" method="POST">
+                <input type="hidden" asp-for="RoleId" value="1" />
+                <div class="row mb-3">
+                    <label asp-for="Username" class="col-md-1 col-form-label text-start">Username</label>
+                    <div class="col-md-5" style="min-height: 4rem;">
+                        <input type="text" class="form-control" asp-for="Username"
+                               placeholder="Enter username" />
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+                    <label asp-for="Password" class="col-md-1 col-form-label text-start">Password</label>
+                    <div class="col-md-5" style="min-height: 4rem;">
+                        <input type="password" class="form-control" asp-for="Password"
+                               placeholder="Enter password" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label asp-for="Firstname" class="col-md-1 col-form-label text-start">Firstname</label>
+                    <div class="col-md-5" style="min-height: 4rem;">
+                        <input type="text" class="form-control" asp-for="Firstname"
+                               placeholder="Enter firstname" />
+                        <span asp-validation-for="Firstname" class="text-danger"></span>
+                    </div>
+                    <label asp-for="Lastname" class="col-md-1 col-form-label text-start">Lastname</label>
+                    <div class="col-md-5" style="min-height: 4rem;">
+                        <input type="text" class="form-control" asp-for="Lastname"
+                               placeholder="Enter lastname" />
+                        <span asp-validation-for="Lastname" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label asp-for="Email" class="col-md-1 col-form-label text-start">Email</label>
+                    <div class="col-md-5" style="min-height: 4rem;">
+                        <input type="text" class="form-control" asp-for="Email"
+                               placeholder="Enter email" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <label asp-for="PhoneNumber" class="col-md-1 col-form-label text-start">Phone</label>
+                    <div class="col-md-5" style="min-height: 4rem;">
+                        <input type="text" class="form-control" asp-for="PhoneNumber"
+                               placeholder="Enter phone number" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="offset-md-1 col-md-5 d-grid">
+                        <button type="submit" class="btn btn-danger">Register Admin</button>
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+    <div>
+        @if (ViewData["ErrorMessage"] is not null)
+        {
+            <div class="alert alert-danger mt-3">
+                <p>@ViewData["ErrorMessage"]</p>
+            </div>
+        }
+    </div>
+</body>
+</html>
