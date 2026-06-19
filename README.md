@@ -1,102 +1,123 @@
-# TeacherOs
+##TeacherOs
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]() [![License](https://img.shields.io/badge/license-MIT-blue)]()
+An ASP.NET Core MVC web application for managing school users and courses (teachers, students, admins). The codebase follows a clean, layered architecture: Controllers → Services → Repositories (Unit of Work) → EF Core DbContext.
 
-A simple ASP.NET Core web application for managing school users and courses (teachers, students, admin). The codebase follows a clean architecture with controllers, services, repositories and EF Core-style DbContext.
+3Why this project is useful
 
-## Why this project is useful
 
-- Role-based user management (Admin, Teacher, Student, User)
-- Separation of concerns: Controllers → Services → Repositories
-- Simple, extensible starter for school management features (courses, users)
-- Includes server-side validation, error handling and resource localization
+Role- and capability-based access control (Role, Capability, User, Teacher, Student)
+Cookie-based authentication with a 30-minute sliding expiration
+Course management with teacher/student relationships
+Separation of concerns: Controllers → Services → Repositories → DbContext
+Custom domain exceptions (EntityNotFoundException, EntityAlreadyExistsException, etc.) for consistent error handling
+AutoMapper for DTO ↔ entity mapping; dedicated signup DTOs per role (Admin/Teacher/Student)
+Structured logging via Serilog
+Localized error messages (English and Greek — el-GR)
+Password hashing via BCrypt
 
-## Quick links
 
-- Source: `TeacherOs/`
-- Entrypoint: `TeacherOs/Program.cs`
-- Controllers: `TeacherOs/Controllers/`
-- Data context: `TeacherOs/Data/SchoolOsContext.cs`
-- Repositories: `TeacherOs/Repositories/`
-- Services: `TeacherOs/Services/`
+#Quick links
 
-## Prerequisites
 
-- .NET SDK 10.0 or later (install from https://dotnet.microsoft.com/)
-- A database instance (e.g. SQL Server, SQLite, PostgreSQL) and a connection string
-- Optional: Visual Studio 2022/2023, VS Code, or JetBrains Rider for development
+Source: TeacherOs/
+Entrypoint: TeacherOs/Program.cs
+Controllers: TeacherOs/Controllers/ (Home, User, Admin, Teacher, Student)
+Models: TeacherOs/Models/ (User, Teacher, Student, Role, Capability, Course)
+Data context: TeacherOs/Data/
+Repositories: TeacherOs/Repositories/ (with UnitOfWork)
+Services: TeacherOs/Services/
+DTOs: TeacherOs/DTO/
+Custom exceptions: TeacherOs/Exceptions/
+Localization resources: TeacherOs/Resources/
 
-## Get started (local development)
 
-1. Clone the repository
+#Prerequisites
 
-```bash
-git clone <repo-url>
+
+.NET SDK 10.0 or later (install from https://dotnet.microsoft.com/)
+A database instance (e.g. SQL Server, SQLite, PostgreSQL) and a connection string
+Optional: Visual Studio 2022/2023, VS Code, or JetBrains Rider for development
+
+
+#Get started (local development)
+
+
+Clone the repository
+
+
+bashgit clone <repo-url>
 cd <repo-directory>
-```
 
-2. Configure the application
 
-- Open `TeacherOs/appsettings.json` (or `appsettings.Development.json`) and set your connection string under `ConnectionStrings`.
+Configure the application
 
-3. Restore, build and run
 
-```bash
-dotnet restore
+
+Open TeacherOs/appsettings.json (or appsettings.Development.json) and add a connection string named DevConnection — the app reads this specific key in Program.cs:
+
+
+json{
+  "ConnectionStrings": {
+    "DevConnection": "Server=localhost;Database=TeacherOs;Trusted_Connection=True;TrustServerCertificate=True;"
+  }
+}
+
+
+Restore, build and run
+
+
+bashdotnet restore
 dotnet build
 cd TeacherOs
 dotnet run
-```
 
-- By default the app runs on the URLs reported in the console. Open the browser and navigate to the displayed URL (e.g. `https://localhost:5001`).
 
-4. Database migrations
+By default the app runs on the URLs reported in the console. Open the browser and navigate to the displayed URL (e.g. https://localhost:5001).
 
-- If the project uses EF Core migrations in your workflow, add and apply migrations as usual. Example commands (adjust project and startup project names if required):
 
-```bash
-# Add migration (example)
+
+Database migrations
+
+
+
+If the project uses EF Core migrations in your workflow, add and apply migrations as usual. Example commands (adjust project and startup project names if required):
+
+
+bash# Add migration (example)
 dotnet ef migrations add InitialCreate --project TeacherOs --startup-project TeacherOs
 # Apply migrations
 dotnet ef database update --project TeacherOs --startup-project TeacherOs
-```
 
 If you do not use EF migrations, ensure your target database schema is created before running the application.
 
-## Configuration overview
+#Configuration overview
 
-- appsettings.json / appsettings.Development.json — application configuration (logging, connection strings)
-- TeacherOs/Program.cs — application startup and DI registration
-- TeacherOs/Repositories/ — repository implementations and UnitOfWork
-- TeacherOs/Services/ — business logic layer
 
-## Testing
+appsettings.json / appsettings.Development.json — application configuration (logging, connection strings)
+TeacherOs/Program.cs — application startup and DI registration
+TeacherOs/Repositories/ — repository implementations and UnitOfWork
+TeacherOs/Services/ — business logic layer
 
-There are no unit tests included in the repository. To add tests, create a new test project (xUnit / NUnit / MSTest), reference `TeacherOs` and follow standard .NET testing patterns.
-
-## Contributing
+Contributing
 
 Contributions are welcome. Suggested workflow:
 
-1. Open an issue describing the feature or bug.
-2. Fork the repository and create a feature branch.
-3. Submit a pull request with a clear description and small, focused changes.
+
+Open an issue describing the feature or bug.
+Fork the repository and create a feature branch.
+Submit a pull request with a clear description and small, focused changes.
+
 
 Please keep changes scoped and include tests where applicable.
+Where to get help
 
-## Where to get help
+Open an issue in this repository for bugs and feature requests.
+Use the repository's code and comments as the primary documentation.
 
-- Open an issue in this repository for bugs and feature requests.
-- Use the repository's code and comments as the primary documentation.
-
-## Maintainers
+Maintainers
 
 Maintained by the repository owner. For maintainers, review pull requests and issues in the GitHub repository.
 
-## License
+Acknowledgements
 
-See the `LICENSE` file in this repository for license details.
-
-## Acknowledgements
-
-Bootstrap and jQuery assets are included under their respective licenses in `TeacherOs/wwwroot/lib/`.
+Bootstrap and jQuery assets are included under their respective licenses in TeacherOs/wwwroot/lib/.
